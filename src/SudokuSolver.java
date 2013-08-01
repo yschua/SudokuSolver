@@ -86,40 +86,13 @@ public class SudokuSolver
 		return solve(this.partSoln, false);
 	}
 
-	// private SudokuGrid solve(SudokuGrid partSoln)
-	// {
-	// 	if (isSolution(partSoln)) {
-	// 		System.out.println("Obtained a solution");
-	// 		return partSoln;
-	// 	} else {
-	// 		//System.out.println(partSoln);
-
-	// 		ArrayList<Pair<Integer, Integer>> unfilledList = partSoln.getUnfilledList();
-	// 		Pair<Integer, Integer> unfilledPos = unfilledList.remove(0);
-	// 		int x = unfilledPos.getX();
-	// 		int y = unfilledPos.getY();
-	// 		Character[] possibleValues = getPossibleValues(grid, x, y);
-
-	// 		System.out.print("Currently looking at " + unfilledPos + ", consisting possible values ");
-	// 		printArray(possibleValues);
-
-	// 		for (int i = 0; i < possibleValues.length; i++) {
-	// 			char value = possibleValues[i];
-	// 			partSoln.setValue(value, x, y);
-	// 			System.out.println("Set " + value + " to " + unfilledPos);
-	// 			if (solve(partSoln) != null)
-	// 				return partSoln;
-
-	// 		}	
-	// 	}
-	// 	return null;
-	// }
-
+	/* Returns true if value is not valid */
 	private static boolean rejectValue(SudokuGrid partSoln, char value, int i, int j)
 	{
 		return !checkValid(partSoln, value, i, j);
 	}
 
+	/* Solve the puzzle using backtracking */
 	private SudokuGrid solve(SudokuGrid partSoln, boolean rejectFlag)
 	{
 		if (rejectFlag)
@@ -154,6 +127,7 @@ public class SudokuSolver
 
 	}
 
+	/* Debug code */
 	private static void printArray(ArrayList<Character> array)
 	{
 		System.out.print("[");
