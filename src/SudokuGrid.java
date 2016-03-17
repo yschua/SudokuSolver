@@ -1,5 +1,6 @@
 import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.stream.IntStream;
 
 public class SudokuGrid implements Cloneable
 {
@@ -10,20 +11,20 @@ public class SudokuGrid implements Cloneable
 	public SudokuGrid()
 	{
 		values = new char[9][9];
-		unfilledList = new ArrayList<Pair<Integer, Integer>>();
-		for (int i = 0; i < values.length; i++) {
-			for (int j = 0; j < values[i].length; j++) {
-				values[i][j] = '0';
-			}
-		}
+		unfilledList = new ArrayList<>();
+
+		IntStream.range(0, values.length).forEach(i ->
+				IntStream.range(0, values[i].length).forEach(j -> values[i][j] = '0'));
+
 		this.computeUnfilled();
 	}
 
 	public SudokuGrid(String initValues)
 	{
 		values = new char[9][9];
-		unfilledList = new ArrayList<Pair<Integer, Integer>>();
+		unfilledList = new ArrayList<>();
 		initValues = initValues.replaceAll("\\s+", "");
+
 		for (int i = 0, strCtr = 0; i < values.length; i++) {
 			for (int j = 0; j < values[i].length; j++, strCtr++) {
 				values[i][j] = initValues.charAt(strCtr);
@@ -40,9 +41,8 @@ public class SudokuGrid implements Cloneable
 	public char[] getColumn(int index)
 	{
 		char[] chr = new char[9];
-		for (int i = 0; i < values[index - 1].length; i++) {
-			chr[i] = values[i][index - 1];
-		}
+		IntStream.range(0, values[index - 1].length)
+				.forEach(i -> chr[i] = values[i][index - 1]);
 		return chr;
 	}
 
@@ -97,31 +97,34 @@ public class SudokuGrid implements Cloneable
 		return true;
 	}
 
+
+
+	public void addToUnfilledList(int i, int j) {
+		unfilled++;
+		unfilledList.add(new Pair<>(i + 1, j + 1));
+	}
+
 	/* 0 represents an unfilled slot on the grid */
 	public void computeUnfilled()
 	{
 		unfilled = 0;
 		unfilledList.clear();
-		for (int i = 0; i < values.length; i++) {
-			for (int j = 0; j < values[i].length; j++) {
-				if (values[i][j] == '0') {
-					unfilled++;
-					unfilledList.add(new Pair<Integer, Integer>(i + 1, j + 1));
-				}
-			}
-		}
+
+		IntStream.range(0, values.length)
+				.forEach(i -> IntStream.range(0, values[i].length)
+						.filter(j -> values[i][j] == '0')
+						.forEach(j -> addToUnfilledList(i, j)));
 	}
 
 	public boolean isComplete()
 	{
-		if (unfilled == 0)
-			return true;
-		return false;
+		return unfilled == 0;
 	}
 
 	public SudokuGrid clone()
 	{
 		SudokuGrid clone = new SudokuGrid();
+
 		for (int i = 0; i < values.length; i++) {
 			for (int j = 0; j < values[i].length; j++) {
 				clone.values[i][j] = this.values[i][j];
@@ -134,6 +137,7 @@ public class SudokuGrid implements Cloneable
 	public String toString()
 	{
 		String str = "";
+
 		for (int i = 0; i < values.length; i++) {
 			for (int j = 0; j < values[i].length; j++) {
 				str += values[i][j] + " ";

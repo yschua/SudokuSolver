@@ -1,5 +1,6 @@
 import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.stream.*;
 
 public class SudokuSolver
 {
@@ -15,11 +16,7 @@ public class SudokuSolver
 	/* Returns true if key is found in array */
 	private static boolean contains(char[] array, char key)
 	{
-		for (char item : array) {
-			if (key == item)
-				return true;
-		}
-		return false;
+		return IntStream.range(0, array.length).anyMatch(i -> array[i] == key);
 	}
 
 	/* Returns true if key is a valid value in a position on the grid */
@@ -42,42 +39,31 @@ public class SudokuSolver
 	/* Returns all possible values for a position given a grid */
 	public static ArrayList<Character> getPossibleValues(SudokuGrid grid, int i, int j)
 	{
-		ArrayList<Character> possibleValues = new ArrayList<Character>(4);
-		for (char value = '1'; value <= '9'; value++) {
-			if (checkValid(grid, value, i, j))
-				possibleValues.add(value);
-		}
+		ArrayList<Character> possibleValues = new ArrayList<>(4);
+		IntStream.range(1, 10)
+				.mapToObj(k -> Character.forDigit(k, 10))
+				.filter(k -> checkValid(grid, k, i, j))
+				.forEach(possibleValues::add);
+
 		return possibleValues;
 	}
 
 	/* Returns true if grid is solved */
 	public static boolean isSolution(SudokuGrid partSoln)
 	{
-		for (int i = 1; i < 10; i++) {
-			if (!checkUnique(partSoln.getRow(i)))
-				return false;
-		}
-		for (int i = 1; i < 10; i++) {
-			if (!checkUnique(partSoln.getColumn(i)))
-				return false;
-		}
-		for (int i = 1; i < 10; i++) {
-			if (!checkUnique(partSoln.getSquare(i)))
-				return false;
-		}
-		return true;
+		return IntStream.range(1, 10)
+				.allMatch(k ->
+						checkUnique(partSoln.getRow(k)) ||
+						checkUnique(partSoln.getColumn(k)) ||
+						checkUnique(partSoln.getSquare(k)));
 	}
 
 	/* Returns true if the values within array are unique (1-9) */
 	public static boolean checkUnique(char[] array)
 	{
-		if (contains(array, '0'))
-			return false;
-		for (char value = '1'; value <= '9'; value++) {
-			if (!contains(array, value))
-				return false;
-		}
-		return true;
+		return !contains(array, '0') && IntStream.range(1, 10)
+				.mapToObj(i -> Character.forDigit(i, 10))
+				.allMatch(i -> contains(array, i));
 	}
 
 	/* Solve the puzzle using backtracking */
@@ -95,8 +81,9 @@ public class SudokuSolver
 	/* Solve the puzzle using backtracking */
 	private SudokuGrid solve(SudokuGrid partSoln, boolean rejectFlag)
 	{
-		if (rejectFlag)
+		if (rejectFlag) {
 			return null;
+		}
 		if (isSolution(partSoln)) {
 			/* debug */ System.out.println("Found solution!"); System.out.println(partSoln);
 			return partSoln;
@@ -116,11 +103,13 @@ public class SudokuSolver
 				}
 				partSoln.setValue(val, x, y);
 				//* debug */ System.out.println("Set " + val + " to " + unfilledPos);
-				if ((solution = solve(partSoln.clone(), rejectFlag)) != null)
+				if ((solution = solve(partSoln.clone(), rejectFlag)) != null) {
 					return solution;
+				}
 				//* debug */ System.out.println("Removed " + val + " from " + unfilledPos);
-				if (rejectFlag)
+				if (rejectFlag) {
 					rejectFlag = false;
+				}
 			}
 			return null;
 		}
@@ -131,8 +120,8 @@ public class SudokuSolver
 	private static void printArray(ArrayList<Character> array)
 	{
 		System.out.print("[");
-		for (int i = 0; i < array.size(); i++)
-			System.out.print(array.get(i) + ",");
+		IntStream.range(0, array.size())
+				.forEach(i -> System.out.println(array.get(i) + ","));
 		System.out.println("\b]");
 	}
 
